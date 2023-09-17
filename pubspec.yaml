@@ -12,10 +12,12 @@ dependencies:
   collection: ^1.16.0
   console: ^4.1.0
   html_unescape: ^2.0.0
-  http: ^0.13.5
+  http: ^1.1.0
   path: ^1.8.2
   petitparser: ^5.1.0
   yaml: ^3.1.1
+  dart_openai: ^4.0.0
+
 dev_dependencies:
   lints: ^2.0.1
   test: ^1.21.7

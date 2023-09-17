@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:arb_translator/src/models/arb_document.dart';
 import 'package:arb_translator/src/models/arb_resource.dart';
+import 'package:arb_translator/src/translators/chat_gpt_translator.dart';
 import 'package:arb_translator/src/translators/deepl_translator.dart';
 import 'package:arb_translator/src/translators/google_translator.dart';
 import 'package:arb_translator/src/utils.dart';
@@ -24,6 +25,8 @@ const _outputDirectory = 'output_directory';
 const _languageCodes = 'language_codes';
 const _outputFileName = 'output_file_name';
 const _translator = 'translator';
+const _chatgptModel = 'chatgpt_model';
+const _chatgptOrgId = 'chatgpt_org_id';
 
 class Action {
   final ArbResource Function(String translation, String currentText)
@@ -74,6 +77,9 @@ void main(List<String> args) async {
       (result[_languageCodes] as List<String>).map((e) => e.trim()).toList();
   var outputDirectory = result[_outputDirectory] as String?;
   final translator = result[_translator] as String;
+
+  final chatgptModel = result[_chatgptModel] as String;
+  final chatgptOrgId = result[_chatgptOrgId] as String?;
 
   final arbFile = File(sourceArb);
   final apiKeyFile = File(apiKeyFilePath);
@@ -161,6 +167,14 @@ void main(List<String> args) async {
             translateList: list.map((action) => action.text).toList(),
             targetLanguageCode: languageCode,
           ).translate();
+        case 'chatgpt':
+          return ChatGptTranslator(
+            apiKey: apiKey,
+            translateList: list.map((action) => action.text).toList(),
+            targetLanguageCode: languageCode,
+            chatGptModel: chatgptModel,
+            organizationId: chatgptOrgId,
+          ).translate();
         default:
           _setBrightRed();
           stderr.write('Please specify a valid translator.');
@@ -233,7 +247,16 @@ ArgParser _initiateParse() {
     ..addOption(
       _translator,
       defaultsTo: 'google',
-      help: 'translator option like google or deepl',
+      help: 'translator option like google, deepl, chatgpt',
+    )
+    ..addOption(
+      _chatgptModel,
+      defaultsTo: 'gpt-3.5-turbo',
+      help: 'chatgpt model identifier',
+    )
+    ..addOption(
+      _chatgptOrgId,
+      help: 'chatgpt organizational id',
     )
     ..addOption(
       _outputDirectory,
